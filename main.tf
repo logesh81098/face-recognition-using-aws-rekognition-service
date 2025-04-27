@@ -26,3 +26,9 @@ module "security-group" {
   source = "./module/security-group"
   vpc-id = module.vpc.vpc-id
 }
+
+module "ec2-instance" {
+  source = "./module/ec2-instance"
+  subnet-id = module.vpc.public-subnet-1
+  security-group = module.security-group.security-group
+}

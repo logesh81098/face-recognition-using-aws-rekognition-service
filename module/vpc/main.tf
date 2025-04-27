@@ -23,6 +23,7 @@ resource "aws_subnet" "public-subnet-1" {
   vpc_id = aws_vpc.face-rekognition-vpc.id
   cidr_block = var.public-subnet-1-cidr
   availability_zone = var.az-1
+  map_public_ip_on_launch = true
   tags = {
     Name = "Face-Rekognition-Public-Subnet-1"
     Project = "Face-Rekognition"
@@ -33,6 +34,7 @@ resource "aws_subnet" "public-subnet-2" {
   vpc_id = aws_vpc.face-rekognition-vpc.id
   cidr_block = var.public-subnet-2-cidr
   availability_zone = var.az-2
+  map_public_ip_on_launch = true
   tags = {
     Name = "Face-Rekognition-Public-Subnet-2"
     Project = "Face-Rekognition"
