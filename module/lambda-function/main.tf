@@ -1,4 +1,16 @@
 #####################################################################################################################################
+#                                                     Archive Files
+#####################################################################################################################################
+
+
+data "archive_file" "rekognition-collection-id" {
+  type = "zip"
+  source_dir = "module/lambda-function"
+  output_path = "module/lambda-function/create-rekognition-collection-id.zip"
+}
+
+
+#####################################################################################################################################
 #                                                     Lambda Function
 #####################################################################################################################################
 
@@ -22,12 +34,12 @@ resource "aws_lambda_function" "rekognition-collection-id" {
 #                                                     Archive Files
 #####################################################################################################################################
 
-
-data "archive_file" "rekognition-collection-id" {
+data "archive_file" "rekognition-faceprints" {
   type = "zip"
   source_dir = "module/lambda-function"
-  output_path = "module/lambda-function/create-rekognition-collection-id.zip"
+  output_path = "module/lambda-function/rekognition-faceprints.zip"
 }
+
 
 
 #####################################################################################################################################
@@ -50,13 +62,11 @@ resource "aws_lambda_function" "rekognition-faceprints" {
 }
 
 
-
-#####################################################################################################################################
-#                                                     Archive Files
-#####################################################################################################################################
-
-data "archive_file" "rekognition-faceprints" {
-  type = "zip"
-  source_dir = "module/lambda-function"
-  output_path = "module/lambda-function/rekognition-faceprints.zip"
+#S3 to trigger lambda function for each Object creation
+resource "aws_lambda_permission" "s3-invoke-lambda" {
+  function_name = aws_lambda_function.rekognition-faceprints.function_name
+  statement_id = "s3-invoke-lambda"
+  action = "lambda:InvokeFunction"
+  principal = "s3.amazonaws.com"
+  source_arn = var.s3-bucket-arn
 }

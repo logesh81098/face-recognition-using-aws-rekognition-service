@@ -5,3 +5,7 @@ variable "iam-role-create-rekognition-collection-arn" {
 variable "iam-role-rekognition-faceprints-arn" {
   default = {}
 }
+
+variable "s3-bucket-arn" {
+  default = {}
+}

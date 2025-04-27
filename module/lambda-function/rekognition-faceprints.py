@@ -30,7 +30,7 @@ def update_index(table_name, face_id, full_name):
         response = dynamodb.put_item(
             TableName=table_name,
             Item={
-                'RekognitionID': {'S': face_id},  # Fixed key name
+                'Rekognitionid': {'S': face_id},  # Fixed key name
                 'FullName': {'S': full_name}
             }
         )
