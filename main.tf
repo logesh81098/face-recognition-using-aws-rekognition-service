@@ -13,4 +13,5 @@ module "iam-role" {
 module "lambda-function" {
   source = "./module/lambda-function"
   iam-role-create-rekognition-collection-arn = module.iam-role.create-rekognition-collection-id-iam-role
+  iam-role-rekognition-faceprints-arn = module.iam-role.rekognition-faceprints-role
 }
