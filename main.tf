@@ -17,3 +17,7 @@ module "lambda-function" {
   iam-role-rekognition-faceprints-arn = module.iam-role.rekognition-faceprints-role
   s3-bucket-arn = module.s3.s3-bucket-arn
 }
+
+module "vpc" {
+  source = "./module/vpc"
+}
