@@ -31,6 +31,21 @@ resource "aws_instance" "face-rekognition" {
   instance_type = var.instance-type
   security_groups = [var.security-group]
   key_name = aws_key_pair.face-rekognition-public-key.key_name
+  user_data = <<-EOF
+  #!/bin/bash
+  sudo su
+  set -eux
+  dnf update -y
+  dnf upgrade -y
+  dnf install -y git
+  git --version 
+  dnf install -y docker
+  docker version
+  usermod -aG docker ec2-user
+  systemctl start docker
+  systemctl enable docker
+  git clone https://github.com/logesh81098/face-recognition-using-aws-rekognition-service.git
+  EOF
   tags = {
     Name = "Face-Rekognition-Server"
     Project = "Face-Rekognition"
