@@ -42,9 +42,15 @@ resource "aws_instance" "face-rekognition" {
   dnf install -y docker
   docker version
   usermod -aG docker ec2-user
-  systemctl start docker
-  systemctl enable docker
+  sudo systemctl enable docker
+  sudo systemctl start docker
+  sudo systemctl status docker
+  cd /
   git clone https://github.com/logesh81098/face-recognition-using-aws-rekognition-service.git
+  cd face-recognition-using-aws-rekognition-service
+  docker build -t face-rekognition-app .
+  docker run -d -p 81:81 face-rekognition-app .
+  docker ps
   EOF
   tags = {
     Name = "Face-Rekognition-Server"
