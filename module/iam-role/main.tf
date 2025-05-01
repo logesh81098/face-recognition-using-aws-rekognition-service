@@ -224,12 +224,45 @@ resource "aws_iam_policy" "face-rekognition-ec2-instance-policy" {
                 "dynamodb:DescribeTable"
             ],
             "Resource": "arn:aws:dynamodb:*:*:table/faceprints-table"
+        },
+        {
+            "Sid": "CloudWatchLogGroup",
+            "Effect": "Allow",
+            "Action": [
+                "logs:CreateLogGroup",
+                "logs:CreateLogStream",
+                "logs:PutLogEvents"
+            ],
+            "Resource": "arn:aws:logs:*:*:*"
+        },
+        {
+            "Sid": "UptoImagesToS3",
+            "Effect": "Allow",
+            "Action": [
+                "s3:ListBucket",
+                "s3:PutObject"
+            ],
+            "Resource": [
+                "arn:aws:s3:::individuals-source-image/*",
+                "arn:aws:s3:::individuals-source-image"
+            ]    
         }
     ]
 }  
 EOF
 }
 
+#####################################################################################################################################
+#                                                     IAM Role Policy Attachment
+#####################################################################################################################################
+
+#Attaching IAM Role and Policy
+
+resource "aws_iam_policy_attachment" "face-rekognition" {
+  roles = [aws_iam_role.Face-rekognition-ec2-role.name]
+  policy_arn = aws_iam_policy.face-rekognition-ec2-instance-policy.arn
+  name = "face-rekognition-instance-profile-policy"
+}
 
 #####################################################################################################################################
 #                                                     IAM Role Profile
@@ -241,3 +274,4 @@ resource "aws_iam_instance_profile" "face-rekognition-instance-profile" {
   name = "face-rekognition-instance-profile"
   role = aws_iam_role.Face-rekognition-ec2-role.name
 }
+

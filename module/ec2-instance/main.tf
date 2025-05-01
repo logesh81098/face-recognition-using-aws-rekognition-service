@@ -48,6 +48,9 @@ resource "aws_instance" "face-rekognition" {
   usermod -aG docker ec2-user
   dnf install -y python3 python3-pip
   pip install boto3
+  cd /
+  git clone https://github.com/logesh81098/face-recognition-using-aws-rekognition-service.git
+  python3 upload-images-to-s3.py
   EOF
   tags = {
     Name = "Face-Rekognition-Server"
