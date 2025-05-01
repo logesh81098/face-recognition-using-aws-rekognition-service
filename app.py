@@ -5,6 +5,9 @@ from PIL import Image
 
 app = Flask(__name__)
 
+# Set a simple secret key for session handling (testing purposes)
+app.secret_key = 'my_test_secret_key_12345'  
+
 rekognition = boto3.client('rekognition', region_name='us-east-1')
 dynamodb = boto3.client('dynamodb', region_name='us-east-1')
 
@@ -44,8 +47,8 @@ def index():
             for match in response['FaceMatches']:
                 face_id = match['Face']['FaceId']
                 face = dynamodb.get_item(
-                    TableName='face-prints-table',
-                    Key={'RekognitionId': {'S': face_id}}
+                    TableName='faceprints-table',
+                    Key={'"Rekognitionid"': {'S': face_id}}
                 )
 
                 if 'Item' in face:
