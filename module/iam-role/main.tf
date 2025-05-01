@@ -212,7 +212,9 @@ resource "aws_iam_policy" "face-rekognition-ec2-instance-policy" {
             "Sid": "SearchFaceInRekognitionService",
             "Effect": "Allow",
             "Action": [
-                "rekognition:SearchFacesByImage"
+                "rekognition:SearchFacesByImage",
+                "rekognition:DetectFaces",
+                "rekognition:ListCollections"
             ],
             "Resource": "arn:aws:rekognition:*:*:collection/*"
         },

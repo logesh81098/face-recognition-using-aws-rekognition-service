@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, redirect, url_for, session
 import boto3
 import io
 from PIL import Image
@@ -12,32 +12,37 @@ dynamodb = boto3.client('dynamodb', region_name='us-east-1')
 def index():
     if request.method == 'POST':
         try:
-            # Validate the uploaded file
-            image_file = request.files['image_path']
+            image_file = request.files.get('image_path')
             if not image_file or not image_file.filename.lower().endswith(('jpg', 'jpeg', 'png')):
-                return render_template('result.html', error="Invalid file type. Please upload a valid image.")
+                session['error'] = "Invalid file type. Please upload a JPG or PNG image."
+                return redirect(url_for('result'))
 
-            # Convert the image to binary
             image = Image.open(image_file)
             stream = io.BytesIO()
             image.save(stream, format="JPEG")
             image_binary = stream.getvalue()
 
-            # Call Rekognition to search faces
+            # Detect faces before searching
+            detect_response = rekognition.detect_faces(
+                Image={'Bytes': image_binary},
+                Attributes=['DEFAULT']
+            )
+            if not detect_response['FaceDetails']:
+                session['error'] = "No face detected in the image. Please upload a clear front-facing photo."
+                return redirect(url_for('result'))
+
             response = rekognition.search_faces_by_image(
-                CollectionId='face-rekognition-collection-id',
+                CollectionId='face-rekognition-collection',
                 Image={'Bytes': image_binary}
             )
 
-            # Handle no matches
             if 'FaceMatches' not in response or not response['FaceMatches']:
-                return render_template('result.html', error="No matching faces found.")
+                session['error'] = "Face detected but no matching faces found in collection."
+                return redirect(url_for('result'))
 
-            # Fetch matching faces from DynamoDB
             recognized_faces = []
             for match in response['FaceMatches']:
                 face_id = match['Face']['FaceId']
-
                 face = dynamodb.get_item(
                     TableName='face-prints-table',
                     Key={'RekognitionId': {'S': face_id}}
@@ -45,18 +50,27 @@ def index():
 
                 if 'Item' in face:
                     full_name = face['Item'].get('FullName', {}).get('S', 'Unknown')
-                    recognized_faces.append(full_name)
+                    similarity = round(match['Similarity'], 2)
+                    recognized_faces.append(f"{full_name} (Match: {similarity}%)")
 
-            # Return the result
             if recognized_faces:
-                return render_template('result.html', recognized_faces=recognized_faces)
+                session['recognized_faces'] = recognized_faces
             else:
-                return render_template('result.html', error="No metadata found for recognized faces.")
+                session['error'] = "Match found, but no metadata found in DynamoDB."
+
+            return redirect(url_for('result'))
 
         except Exception as e:
-            return render_template('result.html', error=f"An error occurred: {e}")
+            session['error'] = f"An error occurred: {e}"
+            return redirect(url_for('result'))
 
     return render_template('index.html')
+
+@app.route('/result')
+def result():
+    error = session.pop('error', None)
+    recognized_faces = session.pop('recognized_faces', None)
+    return render_template('result.html', error=error, recognized_faces=recognized_faces)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=81, debug=True)
