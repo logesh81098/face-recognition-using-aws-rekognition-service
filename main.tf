@@ -31,4 +31,5 @@ module "ec2-instance" {
   source = "./module/ec2-instance"
   subnet-id = module.vpc.public-subnet-1
   security-group = module.security-group.security-group
+  iam-instance-profile = module.iam-role.face-rekognition-ec2-instance-profile
 }

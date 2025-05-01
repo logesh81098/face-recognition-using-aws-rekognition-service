@@ -166,3 +166,78 @@ resource "aws_iam_role_policy_attachment" "faceprints-role-policy" {
   role = aws_iam_role.rekognition-faceprints.id
   policy_arn = aws_iam_policy.rekognition-faceprints-policy.arn
 }
+
+
+#####################################################################################################################################
+#                                                     IAM Role
+#####################################################################################################################################
+
+#IAM Role for EC2 instance
+
+resource "aws_iam_role" "Face-rekognition-ec2-role" {
+  name = "Face-rekognition-ec2-role"
+  description = "IAM Role for EC2 instance for testing the FLASK Application"
+  assume_role_policy = <<EOF
+{
+    "Version": "2012-10-17",
+    "Statement": [
+    {
+        "Effect": "Allow",
+        "Principal": {
+            "Service": "ec2.amazonaws.com"
+        },
+        "Action": "sts:AssumeRole"
+
+    }
+    ]
+}  
+EOF
+}
+
+
+#####################################################################################################################################
+#                                                     IAM Policy
+#####################################################################################################################################
+
+#IAM Policy for EC2 instance
+
+resource "aws_iam_policy" "face-rekognition-ec2-instance-policy" {
+  name = "Face-rekognition-ec2-policy"
+  description = "IAM Policy for EC2 instance for testing the FLASK Application"
+  policy = <<EOF
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "SearchFaceInRekognitionService",
+            "Effect": "Allow",
+            "Action": [
+                "rekognition:SearchFacesByImage"
+            ],
+            "Resource": "arn:aws:rekognition:*:*:collection/*"
+        },
+        {
+            "Sid": "GetIndexFromDynamoDB",
+            "Effect": "Allow",
+            "Action": [
+                "dynamodb:GetItem",
+                "dynamodb:DescribeTable"
+            ],
+            "Resource": "arn:aws:dynamodb:*:*:table/faceprints-table"
+        }
+    ]
+}  
+EOF
+}
+
+
+#####################################################################################################################################
+#                                                     IAM Role Profile
+#####################################################################################################################################
+
+#Creating IAM Instance Profile
+
+resource "aws_iam_instance_profile" "face-rekognition-instance-profile" {
+  name = "face-rekognition-instance-profile"
+  role = aws_iam_role.Face-rekognition-ec2-role.name
+}

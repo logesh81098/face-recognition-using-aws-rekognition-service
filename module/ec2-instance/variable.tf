@@ -13,3 +13,7 @@ variable "instance-type" {
 variable "security-group" {
   default = {}
 }
+
+variable "iam-instance-profile" {
+  default = {}
+}

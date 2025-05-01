@@ -31,6 +31,7 @@ resource "aws_instance" "face-rekognition" {
   instance_type = var.instance-type
   security_groups = [var.security-group]
   key_name = aws_key_pair.face-rekognition-public-key.key_name
+  iam_instance_profile = var.iam-instance-profile
   user_data = <<-EOF
   #!/bin/bash
   sudo su
@@ -40,17 +41,13 @@ resource "aws_instance" "face-rekognition" {
   dnf install -y git
   git --version 
   dnf install -y docker
-  docker version
-  usermod -aG docker ec2-user
   sudo systemctl enable docker
   sudo systemctl start docker
+  sleep 10
   sudo systemctl status docker
-  cd /
-  git clone https://github.com/logesh81098/face-recognition-using-aws-rekognition-service.git
-  cd face-recognition-using-aws-rekognition-service
-  docker build -t face-rekognition-app .
-  docker run -d -p 81:81 face-rekognition-app .
-  docker ps
+  usermod -aG docker ec2-user
+  dnf install -y python3 python3-pip
+  pip install boto3
   EOF
   tags = {
     Name = "Face-Rekognition-Server"
